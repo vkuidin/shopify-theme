@@ -12,7 +12,6 @@ class AddToCartButton extends HTMLElement {
     
     connectedCallback() {
         this.getVariantOptions();
-
         this.addEventListener('click', this.addToCart);
     }
 
@@ -24,63 +23,57 @@ class AddToCartButton extends HTMLElement {
     }
 
     getMatchingVariantId() {
-        let selectedOptions = [];
-        const checkedInputs = document.querySelectorAll('.product-variant__input:checked');
-        checkedInputs.forEach(input => selectedOptions.push(input.value));
-    
+        const selectedOptions = Array.from(document.querySelectorAll('.product-variant__input:checked')).map(input => input.value);
         const matchingVariant = this.variants.find(variant =>
             variant.options.every((opt, i) => opt === selectedOptions[i])
         );
-    
+        
         return matchingVariant ? matchingVariant.id : null;
     }
 
-    setLoadingState(loading) {
-        const button = this;
-        const buttonText = button.querySelector('[add-button-text]');
+    startLoading() {
+        const buttonText = this.querySelector('[add-button-text]');
+        this.classList.add('loading');
+        buttonText.textContent = 'Додається до кошика';
+        this.disabled = true;
+    }
 
-        if (loading) {
-            button.classList.add('loading');
-            buttonText.textContent = 'Додається до кошика';
-            this.disabled = true;
-        } else {
-            button.classList.remove('loading');
-            buttonText.textContent = 'Додати в кошик';
-            this.disabled = false;
-        }
+    stopLoading() {
+        const buttonText = this.querySelector('[add-button-text]');
+        this.classList.remove('loading');
+        buttonText.textContent = 'Додати в кошик';
+        this.disabled = false;
     }
   
-    addToCart() {
+    async addToCart() {
         const variantId = this.getMatchingVariantId();
         const quantity = parseInt(this.quantityInput?.value || '1', 10);
 
-        this.setLoadingState(true);
-  
-        fetch('/cart/add.js', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-                'Accept': 'application/json'
-            },
-            body: JSON.stringify({
-                id: variantId,
-                quantity: quantity
-            })
-        })
-        .then(res => {
+        this.startLoading();
+
+        try {
+            const res = await fetch('/cart/add.js', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'Accept': 'application/json'
+                },
+                body: JSON.stringify({
+                    id: variantId,
+                    quantity: quantity
+                })
+            });
+
             if (!res.ok) throw new Error();
-            return res.json();
-        })
-        .then(() => {
-            this.setLoadingState(false);
-            this.miniCart.refreshMiniCart({ open: true, updateBadge: true })
-        })
-        .catch(() => {
-            this.setLoadingState(false);
+
+            await res.json();
+            this.stopLoading();
+            this.miniCart.openMiniCart({ open: true, updateBadge: true });
+        } catch (error) {
+            this.stopLoading();
             alert('Помилка при додаванні');
-        });
+        }
     }
 }
   
 customElements.define('add-to-cart-button', AddToCartButton);
-  

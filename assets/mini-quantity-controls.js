@@ -13,15 +13,9 @@ class MiniQuantityControls extends HTMLElement {
     }
 
     connectedCallback() {
-        if (this.increaseButton) {
-            this.increaseButton.addEventListener('click', this.handleIncrease.bind(this));
-        }
-        if (this.decreaseButton) {
-            this.decreaseButton.addEventListener('click', this.handleDecrease.bind(this));
-        }
-        if (this.removeButton) {
-            this.removeButton.addEventListener('click', this.handleRemove.bind(this));
-        }
+        this.increaseButton.addEventListener('click', this.handleIncrease.bind(this));
+        this.decreaseButton.addEventListener('click', this.handleDecrease.bind(this));
+        this.removeButton.addEventListener('click', this.handleRemove.bind(this));
 
         this.quantityInput.addEventListener('change', this.updateCart.bind(this));
     }
@@ -50,27 +44,26 @@ class MiniQuantityControls extends HTMLElement {
         }
     }
 
-    updateCart() {
+    async updateCart() {
         const quantity = parseInt(this.quantityInput.value, 10) || 0;
-        fetch(`/cart/change.js`, {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-                id: this.itemId,
-                quantity: quantity,
-            })
-        })
-        .then(response => response.json())
-        .then(() => {
+        try {
+            const response = await fetch(`/cart/change.js`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({
+                    id: this.itemId,
+                    quantity: quantity,
+                })
+            });
+            await response.json();
             if (this.miniCart) {
-                this.miniCart.refreshMiniCart({ open: false, updateBadge: true });
+                this.miniCart.openMiniCart({ open: false, updateBadge: true });
             }
-        })
-        .catch(error => {
+        } catch (error) {
             console.error('Error updating cart:', error);
-        });
+        }
     }
 
 }

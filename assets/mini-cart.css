@@ -13,7 +13,7 @@
     opacity: 1;
 }
 
-.mini-cart-overlay {
+.mini-cart__overlay {
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.4);
@@ -23,23 +23,23 @@
     pointer-events: none;
 }
 
-.mini-cart--open .mini-cart-overlay {
+.mini-cart--open .mini-cart__overlay {
     opacity: 1;
     pointer-events: auto;
 }
 
-.mini-cart-overlay:empty {
+.mini-cart__overlay:empty {
     display: block
 }
 
-.mini-cart-container {
+.mini-cart__container {
     position: fixed;
     inset: 0;
     pointer-events: none;
     z-index: 9998;
 }
 
-.mini-cart--open .mini-cart-container {
+.mini-cart--open .mini-cart__container {
     pointer-events: auto;
 }
 

@@ -6,25 +6,43 @@ class MiniCart extends HTMLElement {
     }
 
     connectedCallback() {
-        this.openMiniCartButton.addEventListener('click', this.refreshMiniCart.bind(this, { open: true, updateBadge: false }));
+        this.openMiniCartButton.addEventListener('click', this.openMiniCart.bind(this, { open: true, updateBadge: false }));
     }
     
-    async refreshMiniCart({ open = false, updateBadge = false } = {}) {
-        return fetch('/cart.js')
-          .then(res => res.json())
-          .then(async cart => {
+    async fetchCart() {
+        try {
+            const response = await fetch('/cart.js');
+            return await response.json();
+        } catch (error) {
+            console.error('Error fetching cart:', error);
+            throw error;
+        }
+    }
+
+    async fetchMiniCartSection() {
+        try {
+            const response = await fetch('/?sections=mini-cart');
+            const sectionData = await response.json();
+            return sectionData['mini-cart'];
+        } catch (error) {
+            console.error('Error fetching mini-cart section:', error);
+            throw error;
+        }
+    }
+
+    async openMiniCart({ open = false, updateBadge = false } = {}) {
+        try {
             if (updateBadge) {
-              this.updateBadgeCount(cart.item_count);
+                const cart = await this.fetchCart();
+                this.updateBadgeCount(cart.item_count);
             }
-      
-            const res = await fetch('/?sections=mini-cart');
-            const data = await res.json();
-            const html = data['mini-cart'];
+            
+            const html = await this.fetchMiniCartSection();
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, 'text/html');
-            const content = doc.querySelector('#shopify-section-mini-cart')?.innerHTML;
-            
-            if (!!content) {
+            const content = doc.querySelector('#shopify-section-mini-cart .mini-cart')?.innerHTML;
+
+            if (content) {
                 this.innerHTML = content;
                 if (open) {
                     setTimeout(() => {
@@ -33,8 +51,10 @@ class MiniCart extends HTMLElement {
                 }
                 this.addCloseHandler();
             }
-          });
-      }
+        } catch (error) {
+            console.error('Error refreshing mini cart:', error);
+        }
+    }
       
 
     addCloseHandler() {

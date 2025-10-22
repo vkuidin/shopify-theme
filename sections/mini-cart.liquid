@@ -2,55 +2,73 @@
   assign cart_items = cart.items
 %}
 
-<div class="mini-cart-container">
-  <div class="mini-cart-overlay"></div>
-  <div class="mini-cart__wrapper">
-    <div class="mini-cart__header">
-      <button mini-cart-close class="mini-cart__close-button">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-        >
-          <line x1="18" y1="6" x2="6" y2="18"></line>
-          <line x1="6" y1="6" x2="18" y2="18"></line>
-        </svg>
-      </button>
-      <h2 class="mini-cart__title">Кошик</h2>
-    </div>
-    {% if cart_items.size > 0 %}
-      <ul class="mini-cart__items">
-        {% for item in cart_items %}
-          {% render 'mini-cart-item',
-            title: item.product.title,
-            variant_id: item.variant.id,
-            variant_title: item.variant.title,
-            description: item.product.description,
-            price: item.price,
-            quantity: item.quantity,
-            max_quantity: item.variant.inventory_quantity,
-            image: item.image
-          %}
-        {% endfor %}
-      </ul>
-      <div class="mini-cart__footer">
-        <div class="mini-cart__total">
-          <span>Разом:</span>
-          <span>{{ cart.total_price | money }}</span>
-        </div>
-        <a href="/cart" class="mini-cart__view-cart">Переглянути кошик</a>
-        <button class="mini-cart__checkout-button">
-          <span>Оформити замовлення</span>
+<script src="{{ 'mini-cart.js' | asset_url }}" defer="defer"></script>
+<script src="{{ 'mini-quantity-controls.js' | asset_url }}" defer="defer"></script>
+{{ 'mini-cart.css' | asset_url | stylesheet_tag }}
+
+<mini-cart class="mini-cart">
+  <div class="mini-cart__container">
+    <div class="mini-cart__overlay"></div>
+    <div class="mini-cart__wrapper">
+      <div class="mini-cart__header">
+        <button mini-cart-close class="mini-cart__close-button">
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            stroke-width="2"
+            stroke-linecap="round"
+            stroke-linejoin="round"
+          >
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
         </button>
+        <h2 class="mini-cart__title">Кошик</h2>
       </div>
-    {% else %}
-      <div class="mini-cart__empty">
-        <p>Ваш кошик порожній</p>
-      </div>
-    {% endif %}
+      {% if cart_items.size > 0 %}
+        <ul class="mini-cart__items">
+          {% for item in cart_items %}
+            {% render 'mini-cart-item',
+              title: item.product.title,
+              variant_id: item.variant.id,
+              variant_title: item.variant.title,
+              description: item.product.description,
+              price: item.price,
+              quantity: item.quantity,
+              max_quantity: item.variant.inventory_quantity,
+              image: item.image
+            %}
+          {% endfor %}
+        </ul>
+        <div class="mini-cart__footer">
+          <div class="mini-cart__total">
+            <span>Разом:</span>
+            <span>{{ cart.total_price | money }}</span>
+          </div>
+          <a href="/cart" class="mini-cart__view-cart">Переглянути кошик</a>
+          <button class="mini-cart__checkout-button">
+            <span>Оформити замовлення</span>
+          </button>
+        </div>
+      {% else %}
+        <div class="mini-cart__empty">
+          <p>Ваш кошик порожній</p>
+        </div>
+      {% endif %}
+    </div>
   </div>
-</div>
+</mini-cart>
+
+{% schema %}
+{
+  "name": "Mini Cart",
+  "settings": [],
+  "presets": [
+    {
+      "name": "Mini Cart"
+    }
+  ]
+}
+{% endschema %}
